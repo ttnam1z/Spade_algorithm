@@ -147,29 +147,29 @@ def Join2Seqs(seq1, seq2):
             if len(dif_1) == len(dif_2):
                 if len(dif_1) == 1:
                     # ac join ab
-                    pairInfo = FindPairInfo(seq1["pairInfo"],seq2["pairInfo"],0) 
+                    #pairInfo = FindPairInfo(seq1["pairInfo"],seq2["pairInfo"],0) 
                     name = copyLs(seq1["name"])
                     name[-1].append(dif_2[0])
-                    item = {"name":name,"pairInfo":pairInfo}
-                    itemLs.append(item)
+                    #item = {"name":name,"pairInfo":pairInfo}
+                    itemLs.append(name)
                 elif  len(dif_1) == 0:
                     #abc join abc
                     for idx in range(len(seq1["name"][-1])):
-                        pairInfo = FindPairInfo(seq1["pairInfo"],seq1["pairInfo"],-1) 
+                        #pairInfo = FindPairInfo(seq1["pairInfo"],seq1["pairInfo"],-1) 
                         name = copyLs(seq1["name"])
                         name.append([seq1["name"][-1][idx]])
-                        item = {"name":name,"pairInfo":pairInfo}
-                        itemLs.append(item)
+                        #item = {"name":name,"pairInfo":pairInfo}
+                        itemLs.append(name)
         elif  l2 == 2:
             inter_ = set(seq1["name"][-1]).intersection(set(seq2["name"][-2]))
             dif_1 = set(seq1["name"][-1]).difference(set(seq2["name"][-2]))
             if len(inter_) == len (seq2["name"][-2]) and len(dif_1) == 1 and len(seq2["name"][-1]) == 1:
                 #joinable
-                pairInfo = FindPairInfo(seq1["pairInfo"],seq2["pairInfo"],-1) 
+                #pairInfo = FindPairInfo(seq1["pairInfo"],seq2["pairInfo"],-1) 
                 name = copyLs(seq1["name"])
                 name.append([seq2["name"][-1][0]])
-                item = {"name":name,"pairInfo":pairInfo}
-                itemLs.append(item)
+                #item = {"name":name,"pairInfo":pairInfo}
+                itemLs.append(name)
     else:
         if l1 == l2:
             inter_ = set(seq1["name"][-1]).intersection(set(seq2["name"][-1]))
@@ -179,31 +179,31 @@ def Join2Seqs(seq1, seq2):
                 if len(dif_1) == 1: 
                     #joinable
                     #
-                    pairInfo = FindPairInfo(seq1["pairInfo"],seq2["pairInfo"],0) 
+                    #pairInfo = FindPairInfo(seq1["pairInfo"],seq2["pairInfo"],0) 
                     name = copyLs(seq1["name"])
                     name[-1].append(dif_2[0])
-                    item = {"name":name,"pairInfo":pairInfo}
-                    itemLs.append(item)
+                    #item = {"name":name,"pairInfo":pairInfo}
+                    itemLs.append(name)
                     #
-                    pairInfo = FindPairInfo(seq1["pairInfo"],seq2["pairInfo"],-1) 
+                    #pairInfo = FindPairInfo(seq1["pairInfo"],seq2["pairInfo"],-1) 
                     name = copyLs(seq1["name"])
                     name.append([dif_2[0]])
-                    item = {"name":name,"pairInfo":pairInfo}
-                    itemLs.append(item)
+                    #item = {"name":name,"pairInfo":pairInfo}
+                    itemLs.append(name)
                     #
-                    pairInfo = FindPairInfo(seq1["pairInfo"],seq2["pairInfo"],1) 
+                    #pairInfo = FindPairInfo(seq1["pairInfo"],seq2["pairInfo"],1) 
                     name = copyLs(seq2["name"])
                     name.append([dif_1[0]])
-                    item = {"name":name,"pairInfo":pairInfo}
-                    itemLs.append(item)
+                    #item = {"name":name,"pairInfo":pairInfo}
+                    itemLs.append(name)
                 elif  len(dif_1) == 0:
                     #abc join abc
                     for idx in range(len(seq1["name"][-1])):
-                        pairInfo = FindPairInfo(seq1["pairInfo"],seq1["pairInfo"],-1) 
+                        #pairInfo = FindPairInfo(seq1["pairInfo"],seq1["pairInfo"],-1) 
                         name = copyLs(seq1["name"])
                         name.append([seq1["name"][-1][idx]])
-                        item = {"name":name,"pairInfo":pairInfo}
-                        itemLs.append(item)
+                        #item = {"name":name,"pairInfo":pairInfo}
+                        itemLs.append(name)
                 
         elif  l1 < l2:
             inter_ = set(seq1["name"][-1]).intersection(set(seq2["name"][-2]))
@@ -211,22 +211,22 @@ def Join2Seqs(seq1, seq2):
             if len(inter_) == len (seq2["name"][-2]) and len(dif_1) == 1 and len(seq2["name"][-1]) == 1 \
                 and Compare2Seqs(seq1["name"][0:-1],seq2["name"][0:-2]):
                 #joinable
-                pairInfo = FindPairInfo(seq1["pairInfo"],seq2["pairInfo"],-1)  
+                #pairInfo = FindPairInfo(seq1["pairInfo"],seq2["pairInfo"],-1)  
                 name = copyLs(seq1["name"])
                 name.append([seq2["name"][-1][0]])
-                item = {"name":name,"pairInfo":pairInfo}
-                itemLs.append(item)
+                #item = {"name":name,"pairInfo":pairInfo}
+                itemLs.append(name)
         else: #l1>l2
             inter_ = set(seq2["name"][-1]).intersection(set(seq1["name"][-2]))
             dif_1 = set(seq2["name"][-1]).difference(set(seq1["name"][-2]))
             if len(inter_) == len (seq1["name"][-2]) and len(dif_1) == 1 and len(seq1["name"][-1]) == 1\
                 and Compare2Seqs(seq2["name"][0:-1],seq1["name"][0:-2]):
                 #joinable
-                pairInfo = FindPairInfo(seq1["pairInfo"],seq2["pairInfo"],1) 
+                #pairInfo = FindPairInfo(seq1["pairInfo"],seq2["pairInfo"],1) 
                 name = copyLs(seq2["name"])
                 name.append([seq1["name"][-1][0]])
-                item = {"name":name,"pairInfo":pairInfo}
-                itemLs.append(item)
+                #item = {"name":name,"pairInfo":pairInfo}
+                itemLs.append(name)
     return itemLs
 
 def JoinFreqItem(eid1, eid2, sid):
@@ -275,10 +275,12 @@ def Enumerating_frequent(equiCls, F, method, minSup, in_idx, maxLen=5):
             ls = Join2Seqs(equiCls[idx],equiCls[jdx])
             #check frequent sequence
             for item in ls:
-                if (not CheckProcessed(item,prs)): # fix check item that processed
+                if (not CheckProcessed(item,prs)):
                     if Prune(item, F, cur_idx-1)==False:
+                        #TODO count sup
                         sup= np.unique(item["pairInfo"][:,0]).shape[0]
                         if sup > minSup:
+                            
                             T[idx].append(item)
                             if idx != jdx:
                                 T[jdx].append(item)
@@ -451,4 +453,4 @@ def main():
 
 main()
 
-# need to fix things: duplicate id list
+# need to fix 2 things: duplicate id list
