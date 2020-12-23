@@ -260,6 +260,7 @@ def FindEquiCls(seqSet, freqItems):
 
 def Enumerating_frequent(equiCls, F, method, minSup, in_idx, maxLen=5):
     T = []
+    prs = []
     cur_idx = in_idx + 1
     if cur_idx >= 5:
         return
@@ -274,13 +275,15 @@ def Enumerating_frequent(equiCls, F, method, minSup, in_idx, maxLen=5):
             ls = Join2Seqs(equiCls[idx],equiCls[jdx])
             #check frequent sequence
             for item in ls:
-                if Prune(item, F, cur_idx-1)==False:
-                    sup= np.unique(item["pairInfo"][:,0]).shape[0]
-                    if sup > minSup:
-                        T[idx].append(item)
-                        if idx != jdx:
-                            T[jdx].append(item)
-                        F[cur_idx].add(item,sup)
+                if (not CheckProcessed(item,prs)): # fix check item that processed
+                    if Prune(item, F, cur_idx-1)==False:
+                        sup= np.unique(item["pairInfo"][:,0]).shape[0]
+                        if sup > minSup:
+                            T[idx].append(item)
+                            if idx != jdx:
+                                T[jdx].append(item)
+                            F[cur_idx].add(item,sup)
+                    prs.append(item)
         if method == "depth":
             if len(T[idx]) > 0:
                 Enumerating_frequent(T[idx],F,method,minSup,cur_idx)
@@ -341,6 +344,13 @@ def GetSubsequence(seq):
                 ls.append(seq1)
     return ls
 
+def CheckProcessed(seq,fSet):
+    find = False
+    for idx in range(len(fSet)):
+        if Compare2Seqs(seq["name"],fSet[idx]["name"]):
+            find = True
+            break
+    return find
 
 def Prune(seq, F, index):
     #check subsequence of seq is a frequent sequence
@@ -427,8 +437,8 @@ def main():
     CDir = os.getcwd()
     data = np.empty([0,3])
     k=0
-    with open(CDir + "\\tags_full.data",encoding="utf8",mode="r") as f:
-    #with open(CDir + "\\test.data",encoding="utf8",mode="r") as f:
+    #with open(CDir + "\\tags_full.data",encoding="utf8",mode="r") as f:
+    with open(CDir + "\\test.data",encoding="utf8",mode="r") as f:
         for line in f:
             ls = line.strip("\n").split(" ", 3)
             data = np.vstack([data,[ls[0],ls[1],ls[3]]])
@@ -437,6 +447,8 @@ def main():
             #    break
 
     preprocess(data)
-    F = Spade(0.003,data,"depth")
+    F = Spade(0.3,data,"depth")
 
 main()
+
+# need to fix things: duplicate id list
