@@ -273,14 +273,14 @@ def FindEquiCls(seqSet, freqItems):
                 equiClsLs[idx].append(seqSet.items[jdx])
     return equiClsLs
 
-def Enumerating_frequent(equiCls, F, method, minSup, in_idx, maxLen=5):
+def Enumerating_frequent(equiCls, F, prs, method, minSup, in_idx, maxLen=5):
     T = []
-    prs = []
     cur_idx = in_idx + 1
     if cur_idx >= 5:
         return
     if len(F) == cur_idx:
         F.append(SequenceList())
+        prs.append([])
     num = len(equiCls) 
     for idx in range(num):
         T.append([])
@@ -290,9 +290,9 @@ def Enumerating_frequent(equiCls, F, method, minSup, in_idx, maxLen=5):
             ls = Join2Seqs(equiCls[idx],equiCls[jdx])
             #check frequent sequence
             for item in ls:
-                if (not CheckProcessed(item,prs)):
+                if (not CheckProcessed(item,prs[cur_idx-2])):
                     if Prune(item, F, cur_idx-1)==False:
-                        #TODO count sup
+                        #count sup
                         pInfo1 = np.empty([0,2])
                         for event in item["name"]:
                             len1 = len(event)
@@ -308,14 +308,14 @@ def Enumerating_frequent(equiCls, F, method, minSup, in_idx, maxLen=5):
                                 T[jdx].append(item)
                             seq = {"name":item["name"],"pairInfo":pInfo1}
                             F[cur_idx].add(seq,sup)
-                    prs.append(item)
+                    prs[cur_idx-2].append(item)
         if method == "depth":
             if len(T[idx]) > 0:
-                Enumerating_frequent(T[idx],F,method,minSup,cur_idx)
+                Enumerating_frequent(T[idx],F,prs,method,minSup,cur_idx)
     if method == "breadth":
         for item in T:
             if len(item) > 0:
-                Enumerating_frequent(item,F,method,minSup,cur_idx)
+                Enumerating_frequent(item,F,prs,method,minSup,cur_idx)
     
 
 def GetSubsequence(seq):
@@ -446,11 +446,11 @@ def Spade(inSup, input_data, method):
         if item_sup > minSup:
             F[1].add(item,item_sup)
     
-
+    prs = [] # check processed , fix duplicate id list
     #Enumerating frequent sequences
     for equiCls in FindEquiCls(F[1],F[0]):
         if len(equiCls) > 0:
-            Enumerating_frequent(equiCls, F, method, minSup, 1)
+            Enumerating_frequent(equiCls, F, prs, method, minSup, 1)
     return F
 
 
@@ -475,5 +475,3 @@ def main():
     F = Spade(0.3,data,"depth")
 
 main()
-
-# need to fix 2 things: duplicate id list
