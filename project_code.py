@@ -145,6 +145,9 @@ def copyLs(inLs):
 
 def Join2Seqs(seq1, seq2):
     #list joined sequences
+    #seq1 = {"name":[["b","a"]]}
+    #seq2 = {"name":[["a","c"]]}
+    
     itemLs = []
 
     #join 2 items
@@ -296,7 +299,10 @@ def Enumerating_frequent(equiCls, F, prs, method, minSup, in_idx, maxLen=5):
                         pInfo1 = np.empty([0,2])
                         for event in item["name"]:
                             len1 = len(event)
-                            pInfo2 = F[len1-1].getInfo([event])
+                            if len1 == cur_idx+1: # fix cant find when event is not listed in frequence list. example: seq = [[abc]]
+                                pInfo2 = FindPairInfo(F[len1-2].getInfo([event[0:-1]]),F[0].getInfo([event[-1]]),0)
+                            else:
+                                pInfo2 = F[len1-1].getInfo([event])
                             if len(pInfo1) == 0:
                                 pInfo1 = pInfo2
                             else:
@@ -395,7 +401,7 @@ def Spade(inSup, input_data, method):
     #convert to number all data
     F=[]
     l1 = np.unique(input_data[:,0])
-    minSup= round(inSup * np.unique(input_data[:,0]).shape[0])
+    minSup= int(inSup * np.unique(input_data[:,0]).shape[0])
     #minSup = 0
     #1.Find frequent items
     #create vertical data
@@ -446,7 +452,7 @@ def Spade(inSup, input_data, method):
         if item_sup > minSup:
             F[1].add(item,item_sup)
     
-    prs = [] # check processed , fix duplicate id list
+    prs = [] # check processed
     #Enumerating frequent sequences
     for equiCls in FindEquiCls(F[1],F[0]):
         if len(equiCls) > 0:
@@ -473,5 +479,7 @@ def main():
 
     preprocess(data)
     F = Spade(0.3,data,"depth")
-
+    for item in F:
+        print(item.num)
+        print("\n")
 main()
