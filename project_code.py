@@ -300,7 +300,7 @@ def Enumerating_frequent(equiCls, F, prs, method, minSup, in_idx, maxLen=5):
                         for event in item["name"]:
                             len1 = len(event)
                             if len1 == cur_idx+1: # fix cant find when event is not listed in frequence list. example: seq = [[abc]]
-                                pInfo2 = FindPairInfo(F[len1-2].getInfo([event[0:-1]]),F[0].getInfo([event[-1]]),0)
+                                pInfo2 = FindPairInfo(F[len1-2].getInfo([event[0:-1]]),F[0].getInfo([[event[-1]]]),0) #fix missing some special seq
                             else:
                                 pInfo2 = F[len1-1].getInfo([event])
                             if len(pInfo1) == 0:
