@@ -1,8 +1,8 @@
-#!curl -L "http://staff.ii.pw.edu.pl/~gprotazi/dydaktyka/dane/diab_trans.data" > diab_trans.csv
 import numpy as np
 import pandas as pd
 import scipy as sp
 import os
+import datetime
 
 #sequenclist structure:
 #   items: list of item.
@@ -276,7 +276,7 @@ def FindEquiCls(seqSet, freqItems):
                 equiClsLs[idx].append(seqSet.items[jdx])
     return equiClsLs
 
-def Enumerating_frequent(equiCls, F, prs, method, minSup, in_idx, maxLen=5):
+def Enumerating_frequent(equiCls, F, prs, method, minSup, in_idx, l1,maxLen=5):
     T = []
     cur_idx = in_idx + 1
     if cur_idx >= 5:
@@ -293,35 +293,46 @@ def Enumerating_frequent(equiCls, F, prs, method, minSup, in_idx, maxLen=5):
             ls = Join2Seqs(equiCls[idx],equiCls[jdx])
             #check frequent sequence
             for item in ls:
+                #if Compare2Seqs(item["name"], [["design","web","webdesign"]]):
+                #    print("fuck")
                 if (not CheckProcessed(item,prs[cur_idx-2])):
                     if Prune(item, F, cur_idx-1)==False:
                         #count sup
                         pInfo1 = np.empty([0,2])
                         for event in item["name"]:
                             len1 = len(event)
-                            if len1 == cur_idx+1: # fix cant find when event is not listed in frequence list. example: seq = [[abc]]
-                                pInfo2 = FindPairInfo(F[len1-2].getInfo([event[0:-1]]),F[0].getInfo([[event[-1]]]),0) #fix missing some special seq
+                            if len1 == cur_idx+1:
+                                #if Compare2Seqs(item["name"], [["design","web","webdesign"]]):
+                                #      a = F[len1-2].getInfo([event[0:-1]])
+                                #      print(np.unique(a[:,0]).shape[0])
+                                #      b = F[0].getInfo([[event[-1]]])
+                                #      print(np.unique(b[:,0]).shape[0])
+                                #      print("end")
+                                pInfo2 = FindPairInfo(F[len1-2].getInfo([event[0:-1]]),F[0].getInfo([[event[-1]]]),0)
                             else:
                                 pInfo2 = F[len1-1].getInfo([event])
                             if len(pInfo1) == 0:
                                 pInfo1 = pInfo2
                             else:
                                 pInfo1 = FindPairInfo(pInfo1, pInfo2)
+                        
                         sup= np.unique(pInfo1[:,0]).shape[0]
+                        #if Compare2Seqs(item["name"], [["design","web","webdesign"]]):
+                        #    print(str(sup) + " " + str(minSup))
                         if sup > minSup:
                             T[idx].append(item)
                             if idx != jdx:
                                 T[jdx].append(item)
                             seq = {"name":item["name"],"pairInfo":pInfo1}
-                            F[cur_idx].add(seq,sup)
+                            F[cur_idx].add(seq,sup/l1)
                     prs[cur_idx-2].append(item)
         if method == "depth":
             if len(T[idx]) > 0:
-                Enumerating_frequent(T[idx],F,prs,method,minSup,cur_idx)
+                Enumerating_frequent(T[idx],F,prs,method,minSup,cur_idx,l1)
     if method == "breadth":
         for item in T:
             if len(item) > 0:
-                Enumerating_frequent(item,F,prs,method,minSup,cur_idx)
+                Enumerating_frequent(item,F,prs,method,minSup,cur_idx,l1)
     
 
 def GetSubsequence(seq):
@@ -400,8 +411,8 @@ def Prune(seq, F, index):
 def Spade(inSup, input_data, method):
     #convert to number all data
     F=[]
-    l1 = np.unique(input_data[:,0])
-    minSup= int(inSup * np.unique(input_data[:,0]).shape[0])
+    l1 = np.unique(input_data[:,0]).shape[0]
+    minSup= inSup * l1
     #minSup = 0
     #1.Find frequent items
     #create vertical data
@@ -422,7 +433,7 @@ def Spade(inSup, input_data, method):
     for item in itemLs.items:
         item_sup = np.unique(item["pairInfo"][:,0]).shape[0]
         if item_sup > minSup:
-            F[0].add(item,item_sup)
+            F[0].add(item,item_sup/l1)
 
     #2.Find frequent 2-sequences
     #Convert to horizon data
@@ -450,36 +461,43 @@ def Spade(inSup, input_data, method):
     for item in item2Ls.items:
         item_sup = np.unique(item["pairInfo"][:,0]).shape[0]
         if item_sup > minSup:
-            F[1].add(item,item_sup)
+            F[1].add(item,item_sup/l1)
     
     prs = [] # check processed
     #Enumerating frequent sequences
     for equiCls in FindEquiCls(F[1],F[0]):
         if len(equiCls) > 0:
-            Enumerating_frequent(equiCls, F, prs, method, minSup, 1)
+            Enumerating_frequent(equiCls, F, prs, method, minSup, 1, l1)
     return F
 
-
-def preprocess(data):
-    #TODO
-    pass
-
 def main():
+    print(datetime.datetime.now())
     CDir = os.getcwd()
     data = np.empty([0,3])
     k=0
-    #with open(CDir + "\\tags_full.data",encoding="utf8",mode="r") as f:
-    with open(CDir + "\\test.data",encoding="utf8",mode="r") as f:
+    with open(CDir + "//tags.data",encoding="utf8",mode="r") as f:
+    #with open(CDir + "\\test.data",encoding="utf8",mode="r") as f:
         for line in f:
             ls = line.strip("\n").split(" ", 3)
             data = np.vstack([data,[ls[0],ls[1],ls[3]]])
             k +=1
-            #if k>100:
-            #    break
 
-    preprocess(data)
-    F = Spade(0.3,data,"depth")
-    for item in F:
-        print(item.num)
+    #F = Spade(0.003,data,"depth")
+    #for i in range(len(F)):
+    #    print("length {} : {}".format(i+1,F[i].num))
+    #    if i >= 2 and F[i].num != 0:
+    #        for j in range(F[i].num):
+    #            print("->".join( ",".join(item) for item in F[i].items[j]["name"]))
+    #    print("\n")
+    #print("end\n")
+
+    F1 = Spade(0.003,data,"breadth")
+    for i in range(len(F1)):
+        print("length {} : {}".format(i+1,F1[i].num))
+        if i >= 2 and F1[i].num != 0:
+            for j in range(F1[i].num):
+                print("->".join( ",".join(item) for item in F1[i].items[j]["name"]))
         print("\n")
+    print(datetime.datetime.now())
+    print("end\n")
 main()
